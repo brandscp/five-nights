@@ -4,6 +4,7 @@ Pizza Inventory System.
 Name:   Brandon Cano
         Fernando Ocon
 Date: 11/29/2024
+new fhdf
 """
 
 import datetime
@@ -487,6 +488,7 @@ class Pizzeria:
 
     def Main_Menu(self):
         while True:
+            print("hello")
             print("""
                     Main Menu:
             1. Management of Inventory
