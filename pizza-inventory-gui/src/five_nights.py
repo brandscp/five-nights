@@ -30,39 +30,39 @@ class Inventory:
         self.ingredients = []
 
 #Option #1 in the Main Menu.
-    def add_ingredient_to_inventory(self, pizzeria):
-        while True:
-            name = input("\nIngredient name: ")
-            if not name.isalpha():
-                print("Please enter a valid ingredient with only letters.\n")               
-            else:
-                stock = pizzeria.get_valid_int("\nStock quantity: ", 1, 1000)
-                while True:
-                    try:
-                        price = float(input("\nPrice: "))
-                        break
-                    except ValueError:
-                        print("Enter a valid value!\n")
-                date_entered = pizzeria.get_valid_date("\nDate Entered (YYYY-MM-DD):")
-                expiration_date = pizzeria.get_valid_date("\nExpiration date (YYYY-MM-DD): ")
-                self.add_ingredient(Ingredient(name, stock, price,date_entered, expiration_date))
-                print(f"\n{name} has been added to the inventory.")
-                while True:
-                    try:
-                        another = input("Do you want to add another ingredient? (yes/no): ").strip().lower()
-                        if another not in ["yes", "no"]:
-                            raise ValueError("Invalid input. Please enter 'yes' or 'no'.")
-                    except ValueError as e:
-                        print(e)
-                        continue
-                    else:
-                        if another == "no":
-                            return
-                        break
-                    
+    def add_ingredient_to_inventory(self, ingredient, stock, price, expiration):
+        if not isinstance(ingredient, str) or not ingredient.isalpha():
+            return "Please enter a valid ingredient with only letters.\n"
+
+        if not stock.isdigit() or int(stock) <= 0:
+            return "Please enter a valid positive integer for stock.\n"
+        stock_val = int(stock)
+
+        try:
+            price_val = float(price)
+            if price_val <= 0:
+                return "Please enter a valid positive number for price.\n"
+        except ValueError:
+            return "Please enter a valid number for price.\n"
+
+        if not expiration:
+            return "Expiration date cannot be empty.\n"
+        try:
+            expiration_val = datetime.datetime.strptime(expiration, "%Y-%m-%d").date()
+        except ValueError:
+            return "Please enter a valid date in YYYY-MM-DD format.\n"
+
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+
+        # Store ingredient as a list item
+        self.add_ingredient(Ingredient(ingredient, stock_val, price_val, current_date, expiration_val.strftime("%Y-%m-%d")))
+
+        return f"{ingredient} added to inventory.\n"
+
+
     def add_ingredient(self, ingredient):
         if any(i.name == ingredient.name for i in self.ingredients):
-            print("Ingredient already exists!")
+            return "Ingredient already exists!"
         else:
             self.ingredients.append(ingredient)
 
@@ -349,17 +349,6 @@ class Pizzeria:
         self.orders.clear()
 
 ###########################################################################################
-
-    def initialize_inventory(self):
-        ingredients_to_add = [
-            "Tomato Sauce", "Mozzarella Cheese", "Dried Oregano", "Cheese",
-            "Pepperoni", "Peppers", "Mushrooms",
-            "Onions", "Ham", "Pineapple"
-        ]
-        self.inventory.add_ingredient(Ingredient(name= "Flour", stock= 100, price=12.50, date_entered="2024-11-25", expiration_date="2025-12-31"))
-        for ingredient in ingredients_to_add:
-            self.inventory.add_ingredient(Ingredient(name=ingredient, stock=100, price=0.5, date_entered="2024-11-25", expiration_date="2025-12-31"))
-
     #this function will contain the initialize inventory
     def initialize_inventory(self):
         ingredients_to_add = [
@@ -453,51 +442,20 @@ class Pizzeria:
                 file.write(f"Added Quantity: {added_quantity}\n")
                 file.write(f"Total Stock After Addition: {total_stock}\n")
                 file.write("-" * 50 + "\n")
-        print("Buy report saved to buy_report.txt.")
-
-    def Menu(self):
-        while True:
-            print("""
-                    Menu:
-            1. Add ingredient to inventory
-            2. View inventory ingredients
-            3. Remove ingredient from inventory
-            4. Print buy list      
-            5. Restock from buy list
-            6. End day and save records
-            7. Exit
-            """)
-            choice = self.get_valid_int("\nEnter your choice: ", 1, 7)
-            if choice == 1:
-                self.inventory.add_ingredient_to_inventory(self)
-            elif choice == 2:
-                self.inventory.view_ingredients()
-            elif choice == 3:
-                self.inventory.view_ingredients()
-                name = input("\nEnter the name of the ingredient to remove: ")
-                self.inventory.remove_ingredient(name)
-            elif choice == 4:
-                self.print_buy_list()
-            elif choice == 5:
-                self.restock_from_buy_list()
-            elif choice == 6:
-                self.end_day()
-            elif choice == 7:
-                break                
+        print("Buy report saved to buy_report.txt.")              
 
 
     def Main_Menu(self):
         while True:
-            print("hello")
             print("""
                     Main Menu:
             1. Management of Inventory
             2. Take Orders
             3.Exit
             """)
-            choice = self.get_valid_int("\nEnter your choice: ", 1, 3)
+            choice = self.get_valid_int("\nEnter your choice: ", 1, 2)
             if choice == 1:
-                self.Menu()
+                print("yes")
             elif choice == 2:
                 self.take_order()
             elif choice == 3:
